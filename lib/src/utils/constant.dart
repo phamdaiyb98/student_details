@@ -56,10 +56,10 @@ class AppConstant {
   static const String recordEffectiveStartDate = "Record Effective Start Date";
   static const String recordEffectiveEndDate = "Record Effective End Date";
   static const String studentName = "Student Name ";
-  static const String reportingLEA = "Reporting LEA";
-  static const String schoolOfAttendance = "School of Attendance";
-  static const String sSID = "SSID";
-  static const String localID = "Local ID";
-  static const String gradeLevel = "Grade Level";
-  static const String enrollmentStartDate = "Enrollment Start Date";
+  static const String reportingLEA = "Reporting LEA ";
+  static const String schoolOfAttendance = "School of Attendance ";
+  static const String sSID = "SSID ";
+  static const String localID = "Local ID ";
+  static const String gradeLevel = "Grade Level ";
+  static const String enrollmentStartDate = "Enrollment Start Date ";
 }

@@ -1,9 +1,11 @@
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:student_details/src/model/Student.dart';
 import 'package:student_details/src/ui/enum/radio_choose.dart';
 import 'package:student_details/src/utils/constant.dart';
-import 'package:student_details/src/utils/funtion_helper.dart';
+import 'package:student_details/src/utils/function_helper.dart';
+import 'package:student_details/src/utils/validator.dart';
 
 class UIComponent {
   static Widget buildTopButton(
@@ -68,9 +70,13 @@ class UIStyle {
 
 // AppTextField
 class AppTextField extends StatefulWidget {
-  const AppTextField({Key key, this.title, this.isRequired}) : super(key: key);
+  const AppTextField(
+      {Key key, this.title, this.isRequired, this.student, this.onSave})
+      : super(key: key);
   final String title;
   final bool isRequired;
+  final Student student;
+  final Function onSave;
 
   @override
   _AppTextFieldState createState() => _AppTextFieldState();
@@ -90,11 +96,17 @@ class _AppTextFieldState extends State<AppTextField> {
           SizedBox(
             height: 70.0,
             child: TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: widget.isRequired
+                  ? (value) => Validator.validateTextField(value)
+                  : null,
+              onSaved: (newValue) => widget.onSave(newValue),
               decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(10.0),
                 helperText: "",
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  borderSide: BorderSide(color: Colors.black),
+                  borderSide: BorderSide(color: Colors.black54),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
@@ -102,7 +114,7 @@ class _AppTextFieldState extends State<AppTextField> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  borderSide: BorderSide(color: Colors.black),
+                  borderSide: BorderSide(color: Colors.black54),
                 ),
               ),
             ),
@@ -116,12 +128,13 @@ class _AppTextFieldState extends State<AppTextField> {
 // AppRadioField
 class AppRadioField extends StatefulWidget {
   const AppRadioField(
-      {Key key, this.title, this.isRequired, this.isHasThreeCol})
+      {Key key, this.title, this.isRequired, this.isHasThreeCol, this.onSave})
       : super(key: key);
 
   final String title;
   final bool isRequired;
   final bool isHasThreeCol;
+  final Function onSave;
 
   @override
   _RadioFieldState createState() => _RadioFieldState();
@@ -141,54 +154,60 @@ class _RadioFieldState extends State<AppRadioField> {
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w600)),
           SizedBox(height: 5.0),
           Container(
-            color: Colors.grey[300],
-            child: Column(
-              children: [
-                widget.isHasThreeCol
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Radio(
-                              value: RadioChoose.notApplicable,
-                              groupValue: _groupValue,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  _groupValue = newValue;
-                                });
-                              }),
-                          const Text(AppConstant.notApplicable)
-                        ],
-                      )
-                    : Row(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Radio(
-                        value: RadioChoose.yes,
-                        groupValue: _groupValue,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _groupValue = newValue;
-                          });
-                        }),
-                    const Text(AppConstant.yes)
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Radio(
-                        value: RadioChoose.no,
-                        groupValue: _groupValue,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _groupValue = newValue;
-                          });
-                        }),
-                    const Text(AppConstant.no)
-                  ],
-                )
-              ],
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
+            child: FormField(
+              onSaved: (_) => widget.onSave(_groupValue),
+              builder: (field) => Column(
+                children: [
+                  widget.isHasThreeCol
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Radio(
+                                value: RadioChoose.notApplicable,
+                                groupValue: _groupValue,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    _groupValue = newValue;
+                                  });
+                                }),
+                            const Text(AppConstant.notApplicable)
+                          ],
+                        )
+                      : Row(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Radio(
+                          value: RadioChoose.yes,
+                          groupValue: _groupValue,
+                          onChanged: (newValue) {
+                            setState(() {
+                              _groupValue = newValue;
+                            });
+                          }),
+                      const Text(AppConstant.yes)
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Radio(
+                          value: RadioChoose.no,
+                          groupValue: _groupValue,
+                          onChanged: (newValue) {
+                            setState(() {
+                              _groupValue = newValue;
+                            });
+                          }),
+                      const Text(AppConstant.no)
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
           SizedBox(height: 20.0),
@@ -201,12 +220,18 @@ class _RadioFieldState extends State<AppRadioField> {
 // AppDatePickerField
 class AppDatePickerField extends StatefulWidget {
   const AppDatePickerField(
-      {Key key, this.title, this.isRequired, this.firstDate, this.lastDate})
+      {Key key,
+      this.title,
+      this.isRequired,
+      this.firstDate,
+      this.lastDate,
+      this.onSave})
       : super(key: key);
   final String title;
   final bool isRequired;
   final DateTime firstDate;
   final DateTime lastDate;
+  final Function onSave;
 
   @override
   _DatePickerFieldState createState() => _DatePickerFieldState();
@@ -214,6 +239,7 @@ class AppDatePickerField extends StatefulWidget {
 
 class _DatePickerFieldState extends State<AppDatePickerField> {
   TextEditingController _textController = TextEditingController();
+  DateTime _currentValue;
 
   @override
   void initState() {
@@ -231,31 +257,26 @@ class _DatePickerFieldState extends State<AppDatePickerField> {
           Text(widget.isRequired ? widget.title + " *" : widget.title,
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w600)),
           SizedBox(height: 5.0),
-          SizedBox(
-            height: 70.0,
+          Container(
+            height: 70,
             child: TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: widget.isRequired
+                  ? (value) => Validator.validateTextField(value)
+                  : null,
+              onSaved: (newValue) => widget.onSave(_currentValue),
               controller: _textController,
               readOnly: true,
               decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(10.0),
                 suffixIcon: Icon(
                   Icons.calendar_today_rounded,
                   color: Colors.grey[800],
                 ),
-                // onPressed: () {
-                //   showDatePicker(
-                //     context: context,
-                //     initialDate: DateTime.now(),
-                //     firstDate: DateTime(1950),
-                //     lastDate: DateTime(2030),
-                //     helpText: AppConstant.birthDate,
-                //     // locale: Locale('fr', 'CH'),
-                //   ).then((value) => print(value));
-                // },
-                // errorText: errorText,
                 helperText: "",
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  borderSide: BorderSide(color: Colors.black),
+                  borderSide: BorderSide(color: Colors.black54),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
@@ -263,60 +284,21 @@ class _DatePickerFieldState extends State<AppDatePickerField> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  borderSide: BorderSide(color: Colors.black),
+                  borderSide: BorderSide(color: Colors.black54),
                 ),
               ),
               onTap: () async {
-                // DateTime pickedDate = await showDatePicker(
-                //   context: context,
-                //   helpText: widget.title,
-                //   // TODO: see: https://flutter.dev/docs/development/accessibility-and-localization/internationalization to resolve
-                //   // locale: Locale('fr', 'CA'),
-                //   initialDate: DateTime.now(),
-                //   firstDate: widget.firstDate,
-                //   lastDate: widget.lastDate,
-
-                // );
-
-                // if (pickedDate != null) {
-                //   String formattedDate =
-                //       DateFormat("dd/MM/yyyy").format(pickedDate);
-                //   setState(() {
-                //     _textController.text = formattedDate;
-                //   });
-                // } else {
-                //   print("Date is not selected");
-                // }
-
-                // DatePicker.showPicker(
-                //   context,
-                //   showTitleActions: true,
-                //   onChanged: (date) {
-                //     print('change $date');
-                //   },
-                //   onConfirm: (date) {
-                //     print('confirm $date');
-                //     String formattedDate =
-                //         DateFormat("dd/MM/yyyy").format(date);
-                //     setState(() {
-                //       _textController.text = formattedDate;
-                //     });
-                //   },
-                //   onCancel: () {},
-                //   pickerModel: MyDatePickerModel(),
-                //   locale: LocaleType.en,
-                // );
-
                 DatePicker.showDatePicker(
                   context,
                   showTitleActions: true,
                   minTime: widget.firstDate,
                   maxTime: widget.lastDate,
                   onChanged: (date) {
-                    print('change $date');
+                    // print('change $date');
                   },
                   onConfirm: (date) {
-                    print('confirm $date');
+                    // print('confirm $date');
+                    _currentValue = date;
                     String formattedDate =
                         DateFormat("dd/MM/yyyy").format(date);
                     setState(() {
@@ -337,11 +319,13 @@ class _DatePickerFieldState extends State<AppDatePickerField> {
 
 // DropdownButton
 class AppDropDownField extends StatefulWidget {
-  const AppDropDownField({Key key, this.title, this.isRequired, this.data})
+  const AppDropDownField(
+      {Key key, this.title, this.isRequired, this.data, this.onSave})
       : super(key: key);
   final String title;
   final bool isRequired;
   final List<Map<String, dynamic>> data;
+  final Function onSave;
 
   @override
   _DropDownFieldState createState() => _DropDownFieldState();
@@ -368,6 +352,17 @@ class _DropDownFieldState extends State<AppDropDownField> {
     }
   }
 
+  Map<String, dynamic> findItemByValue(int value) {
+    int length = widget.data.length;
+    for (int i = 0; i < length; i++) {
+      // check same value
+      if (widget.data[i]['value'] == value) {
+        return widget.data[i];
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -391,23 +386,25 @@ class _DropDownFieldState extends State<AppDropDownField> {
               ],
               borderRadius: BorderRadius.all(Radius.circular(8.0)),
             ),
-            height: 50.0,
+            height: 47.0,
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<dynamic>(
-                dropdownColor: Colors.blue[50],
-                underline: Container(),
-                isExpanded: true,
-                onChanged: (newValue) {
-                  setState(() {
-                    _value = newValue;
-                  });
-                },
-                value: _value,
-                items: _items,
+            child: FormField(
+              onSaved: (_) => widget.onSave(findItemByValue(_value)),
+              builder: (field) => DropdownButtonHideUnderline(
+                child: DropdownButton<dynamic>(
+                  dropdownColor: Colors.blue[50],
+                  isExpanded: true,
+                  onChanged: (newValue) {
+                    setState(() {
+                      _value = newValue;
+                    });
+                  },
+                  value: _value,
+                  items: _items,
+                ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

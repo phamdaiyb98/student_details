@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:student_details/src/ui/enum/gender.dart';
+import 'package:student_details/src/model/Student.dart';
 import '../utils/constant.dart';
 import './component/component.dart';
 import '../utils/color.dart';
+
+enum SearchType { web, image, news, shopping }
 
 class StudentDetail extends StatefulWidget {
   const StudentDetail({Key key}) : super(key: key);
@@ -12,7 +14,15 @@ class StudentDetail extends StatefulWidget {
 }
 
 class _StudentDetailState extends State<StudentDetail> {
-  Key _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  Student student;
+
+  @override
+  void initState() {
+    student = Student();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,7 +34,6 @@ class _StudentDetailState extends State<StudentDetail> {
           appBar: _buildAppBar(),
           body: _buildBody(),
           bottomSheet: _buildBottomControl(),
-          // floatingActionButton: _buildBottomControl(),
         ),
       ),
     );
@@ -72,7 +81,9 @@ class _StudentDetailState extends State<StudentDetail> {
                     Colors.blue,
                     Colors.white,
                     AppConstant.validateLabel,
-                    () => print("validateLabel"),
+                    () {
+                      _formKey.currentState.validate();
+                    },
                   ),
                 ),
               ],
@@ -117,7 +128,18 @@ class _StudentDetailState extends State<StudentDetail> {
                       fontSize: 10.0,
                     ),
                   ),
-                  onPressed: () => print("post"),
+                  onPressed: () {
+                    if (_formKey.currentState.validate()) {
+                      _formKey.currentState.save();
+                      print(student.parentGuardianHighest);
+                      print(student.guardian1LastName);
+                      print(student.guardian2LastName);
+                      print(student.guardian1FirstName);
+                      print(student.guardian2FirstName);
+                      print(student.recordEffectiveStartDate);
+                      print(student.recordEffectiveEndDate);
+                    }
+                  },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.blue),
                     padding: MaterialStateProperty.all(EdgeInsets.all(4.0)),
@@ -147,41 +169,62 @@ class _StudentDetailState extends State<StudentDetail> {
     Widget title = UIComponent.buildTitle(AppConstant.studentInfo);
     final fields = <Widget>[];
     // legalLastName
-    Widget legalLastName =
-        AppTextField(title: AppConstant.legalLastName, isRequired: true);
+    Widget legalLastName = AppTextField(
+      title: AppConstant.legalLastName,
+      isRequired: true,
+      student: new Student(),
+      onSave: (newValue) => student.legalLastName = newValue,
+    );
     // legalFirstName
-    Widget legalFirstName =
-        AppTextField(title: AppConstant.legalFirstName, isRequired: true);
+    Widget legalFirstName = AppTextField(
+      title: AppConstant.legalFirstName,
+      isRequired: true,
+      onSave: (newValue) => student.legalFirstName = newValue,
+    );
     // legalMiddleName
-    Widget legalMiddleName =
-        AppTextField(title: AppConstant.legalMiddleName, isRequired: false);
+    Widget legalMiddleName = AppTextField(
+        title: AppConstant.legalMiddleName,
+        isRequired: false,
+        onSave: (newValue) => student.legalMiddleName = newValue);
     // aliasLegalLastName
-    Widget aliasLegalLastName =
-        AppTextField(title: AppConstant.aliasLegalLastName, isRequired: false);
+    Widget aliasLegalLastName = AppTextField(
+        title: AppConstant.aliasLegalLastName,
+        isRequired: false,
+        onSave: (newValue) => student.aliasLegalLastName = newValue);
     // aliasLegalLastName
-    Widget aliasLegalFirstName =
-        AppTextField(title: AppConstant.aliasLegalFirstName, isRequired: false);
+    Widget aliasLegalFirstName = AppTextField(
+        title: AppConstant.aliasLegalFirstName,
+        isRequired: false,
+        onSave: (newValue) => student.aliasLegalFirstName = newValue);
     // aliasLegalMiddleName
     Widget aliasLegalMiddleName = AppTextField(
-        title: AppConstant.aliasLegalMiddleName, isRequired: false);
-    Widget legalSuffix = AppDropDownField(
-        title: AppConstant.legalSuffix,
+        title: AppConstant.aliasLegalMiddleName,
         isRequired: false,
-        data: _generateDropdownList(AppConstant.legalSuffix, 3));
+        onSave: (newValue) => student.aliasLegalMiddleName = newValue);
+    Widget legalSuffix = AppDropDownField(
+      title: AppConstant.legalSuffix,
+      isRequired: false,
+      data: _generateDropdownList(AppConstant.legalSuffix, 3),
+      onSave: (newValue) => student.legalSuffix = newValue,
+    );
     // birthDate
     Widget birthDate = AppDatePickerField(
       title: AppConstant.birthDate,
       isRequired: true,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      onSave: (newValue) => student.birthDate = newValue,
     );
     // preferredFirstName
-    Widget preferredFirstName =
-        AppTextField(title: AppConstant.preferredFirstName, isRequired: false);
-    ;
+    Widget preferredFirstName = AppTextField(
+        title: AppConstant.preferredFirstName,
+        isRequired: false,
+        onSave: (newValue) => student.preferredFirstName = newValue);
     // preferredFirstName
-    Widget preferredLastName =
-        AppTextField(title: AppConstant.preferredLastName, isRequired: false);
+    Widget preferredLastName = AppTextField(
+        title: AppConstant.preferredLastName,
+        isRequired: false,
+        onSave: (newValue) => student.preferredLastName = newValue);
     // gender
     final genderList = [
       {
@@ -198,27 +241,38 @@ class _StudentDetailState extends State<StudentDetail> {
       }
     ];
     Widget gender = AppDropDownField(
-        title: AppConstant.gender, isRequired: false, data: genderList);
+      title: AppConstant.gender,
+      isRequired: false,
+      data: genderList,
+      onSave: (newValue) => student.gender = newValue,
+    );
     // enrolledInUS
     Widget enrolledInUS = AppRadioField(
       title: AppConstant.enrolledInUS,
       isRequired: false,
       isHasThreeCol: false,
+      onSave: (newValue) => student.enrolledInUS = newValue,
     );
     // birthCountry
     Widget birthCountry = AppDropDownField(
-        title: AppConstant.birthCountry,
-        isRequired: false,
-        data: _generateDropdownList(AppConstant.birthCountry, 100));
+      title: AppConstant.birthCountry,
+      isRequired: false,
+      data: _generateDropdownList(AppConstant.birthCountry, 100),
+      onSave: (newValue) => student.birthCountry = newValue,
+    );
     // birthCity
-    Widget birthCity =
-        AppTextField(title: AppConstant.birthCity, isRequired: false);
+    Widget birthCity = AppTextField(
+      title: AppConstant.birthCity,
+      isRequired: false,
+      onSave: (newValue) => student.birthCity = newValue,
+    );
     // initialUSEnrollmentDate
     Widget initialUSEnrollmentDate = AppDatePickerField(
       title: AppConstant.initialUSEnrollmentDate,
       isRequired: false,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      onSave: (newValue) => student.initialUSEnrollmentDate = newValue,
     );
 
     fields.add(legalLastName);
@@ -247,48 +301,56 @@ class _StudentDetailState extends State<StudentDetail> {
       title: AppConstant.hispanicEthnicityIndicator,
       isRequired: false,
       isHasThreeCol: true,
+      onSave: (newValue) => student.hispanicEthnicityIndicator = newValue,
     );
     // raceCodeMissingIndicator
     Widget raceCodeMissingIndicator = AppRadioField(
       title: AppConstant.raceCodeMissingIndicator,
       isRequired: false,
       isHasThreeCol: false,
+      onSave: (newValue) => student.raceCodeMissingIndicator = newValue,
     );
     // ethnicityMissingIndicator
     Widget ethnicityMissingIndicator = AppRadioField(
       title: AppConstant.ethnicityMissingIndicator,
       isRequired: false,
       isHasThreeCol: false,
+      onSave: (newValue) => student.ethnicityMissingIndicator = newValue,
     );
     // raceCode1
     Widget raceCode1 = AppDropDownField(
       title: AppConstant.raceCode1,
       isRequired: false,
       data: _generateDropdownList(AppConstant.raceCode1, 10),
+      onSave: (newValue) => student.raceCode1 = newValue,
     );
     // raceCode2
     Widget raceCode2 = AppDropDownField(
       title: AppConstant.raceCode2,
       isRequired: false,
       data: _generateDropdownList(AppConstant.raceCode2, 10),
+      onSave: (newValue) => student.raceCode2 = newValue,
     );
     // raceCode3
     Widget raceCode3 = AppDropDownField(
       title: AppConstant.raceCode3,
       isRequired: false,
       data: _generateDropdownList(AppConstant.raceCode3, 10),
+      onSave: (newValue) => student.raceCode3 = newValue,
     );
     // raceCode4
     Widget raceCode4 = AppDropDownField(
       title: AppConstant.raceCode4,
       isRequired: false,
       data: _generateDropdownList(AppConstant.raceCode4, 10),
+      onSave: (newValue) => student.raceCode4 = newValue,
     );
     // raceCode5
     Widget raceCode5 = AppDropDownField(
       title: AppConstant.raceCode5,
       isRequired: false,
       data: _generateDropdownList(AppConstant.raceCode5, 10),
+      onSave: (newValue) => student.raceCode5 = newValue,
     );
 
     fields.add(hispanicEthnicityIndicator);
@@ -311,19 +373,32 @@ class _StudentDetailState extends State<StudentDetail> {
       title: AppConstant.parentGuardianHighest,
       isRequired: false,
       data: _generateDropdownList(AppConstant.parentGuardianHighest, 10),
+      onSave: (newValue) => student.parentGuardianHighest = newValue,
     );
     // guardian1FirstName
-    Widget guardian1FirstName =
-        AppTextField(title: AppConstant.guardian1FirstName, isRequired: false);
+    Widget guardian1FirstName = AppTextField(
+      title: AppConstant.guardian1FirstName,
+      isRequired: false,
+      onSave: (newValue) => student.guardian1FirstName = newValue,
+    );
     // guardian1LastName
-    Widget guardian1LastName =
-        AppTextField(title: AppConstant.guardian1LastName, isRequired: false);
+    Widget guardian1LastName = AppTextField(
+      title: AppConstant.guardian1LastName,
+      isRequired: false,
+      onSave: (newValue) => student.guardian1LastName = newValue,
+    );
     // guardian2FirstName
-    Widget guardian2FirstName =
-        AppTextField(title: AppConstant.guardian2FirstName, isRequired: false);
+    Widget guardian2FirstName = AppTextField(
+      title: AppConstant.guardian2FirstName,
+      isRequired: false,
+      onSave: (newValue) => student.guardian2FirstName = newValue,
+    );
     // guardian2LastName
-    Widget guardian2LastName =
-        AppTextField(title: AppConstant.guardian2LastName, isRequired: false);
+    Widget guardian2LastName = AppTextField(
+      title: AppConstant.guardian2LastName,
+      isRequired: false,
+      onSave: (newValue) => student.guardian2LastName = newValue,
+    );
     fields.add(parentGuardianHighest);
     fields.add(guardian1FirstName);
     fields.add(guardian1LastName);
@@ -332,9 +407,37 @@ class _StudentDetailState extends State<StudentDetail> {
     return UIComponent.buildDetailsPart(title, fields);
   }
 
-// TODO: làm tiếp boxShadow
+  Widget _buildBottomInfoField(String title, String info) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: RichText(
+        textAlign: TextAlign.left,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 10,
+        softWrap: true,
+        text: TextSpan(children: [
+          TextSpan(text: title, style: UIStyle.text18Black),
+          TextSpan(
+            text: info,
+            style: UIStyle.text20BlackBold,
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10.0),
+      height: 1.0,
+      color: Colors.black26,
+    );
+  }
+
   Widget _buildBottomInfo() {
     return Container(
+      margin: const EdgeInsets.only(bottom: 15.0),
+      padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -346,26 +449,29 @@ class _StudentDetailState extends State<StudentDetail> {
         ],
         borderRadius: BorderRadius.all(Radius.circular(8.0)),
       ),
-      child: Row(
-        // mainAxisSize: MainAxisSize.max,
-
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10.0),
-                child: RichText(
-                  text: TextSpan(children: [
-                    const TextSpan(
-                        text: AppConstant.studentName,
-                        style: UIStyle.text18Black),
-                    TextSpan(
-                        text: "Jones, Jonas", style: UIStyle.text20BlackBold),
-                  ]),
-                ),
-              )
-            ],
-          ),
+          _buildBottomInfoField(
+              AppConstant.studentName, '....................'),
+          _buildDivider(),
+          _buildBottomInfoField(
+              AppConstant.reportingLEA, '....................'),
+          _buildDivider(),
+          _buildBottomInfoField(
+              AppConstant.schoolOfAttendance, '....................'),
+          _buildDivider(),
+          _buildBottomInfoField(AppConstant.sSID, '....................'),
+          _buildDivider(),
+          _buildBottomInfoField(AppConstant.localID, '....................'),
+          _buildDivider(),
+          _buildBottomInfoField(AppConstant.gender, '....................'),
+          _buildDivider(),
+          _buildBottomInfoField(AppConstant.birthDate, '....................'),
+          _buildDivider(),
+          _buildBottomInfoField(AppConstant.gradeLevel, '....................'),
+          _buildDivider(),
+          _buildBottomInfoField(AppConstant.enrollmentStartDate, '08/13/2020'),
         ],
       ),
     );
@@ -380,12 +486,14 @@ class _StudentDetailState extends State<StudentDetail> {
           isRequired: true,
           firstDate: DateTime(1900),
           lastDate: DateTime.now(),
+          onSave: (newValue) => student.recordEffectiveStartDate = newValue,
         ),
         AppDatePickerField(
           title: AppConstant.recordEffectiveEndDate,
           isRequired: false,
           firstDate: DateTime(1900),
           lastDate: DateTime.now(),
+          onSave: (newValue) => student.recordEffectiveEndDate = newValue,
         ),
       ],
     ));
